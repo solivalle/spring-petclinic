@@ -33,7 +33,7 @@
     <spring-format.version>0.0.47</spring-format.version>
 
     <sonar.organization>solivalle</sonar.organization>
-    <sonar.projectKey>spring-petclinic</sonar.projectKey>
+    <sonar.projectKey>solivalle_spring-petclinic</sonar.projectKey>
   </properties>
 
   <licenses>
