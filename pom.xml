@@ -31,6 +31,9 @@
     <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
     <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
     <spring-format.version>0.0.47</spring-format.version>
+
+    <sonar.organization>solivalle</sonar.organization>
+    <sonar.projectKey>solivalle_spring-petclinic</sonar.projectKey>
   </properties>
 
   <licenses>
