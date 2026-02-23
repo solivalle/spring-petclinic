@@ -21,9 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for searching and managing owner queries.
- * Part of the Strangler Fig refactoring to extract business logic from controllers.
- * Implements Single Responsibility Principle for search operations.
+ * Service for searching and managing owner queries. Part of the Strangler Fig refactoring
+ * to extract business logic from controllers. Implements Single Responsibility Principle
+ * for search operations.
  *
  * @author Tech Debt Refactoring Team
  */

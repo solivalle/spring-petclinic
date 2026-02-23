@@ -23,8 +23,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
 /**
- * Service for validating Pet business rules.
- * Part of the Strangler Fig refactoring to extract validation logic from controllers.
+ * Service for validating Pet business rules. Part of the Strangler Fig refactoring to
+ * extract validation logic from controllers.
  *
  * @author Tech Debt Refactoring Team
  */

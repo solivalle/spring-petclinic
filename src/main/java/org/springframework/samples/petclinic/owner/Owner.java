@@ -111,8 +111,8 @@ public class Owner extends Person {
 	}
 
 	/**
-	 * Return the Pet with the given id, or null if none found for this Owner.
-	 * Refactored to use Streams for better readability and performance.
+	 * Return the Pet with the given id, or null if none found for this Owner. Refactored
+	 * to use Streams for better readability and performance.
 	 * @param id to test
 	 * @return the Pet with the given id, or null if no such Pet exists for this Owner
 	 */

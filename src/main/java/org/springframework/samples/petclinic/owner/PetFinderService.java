@@ -22,9 +22,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for finding pets within an owner's collection.
- * Part of the Strangler Fig refactoring to extract search logic from domain models.
- * Uses functional programming with Streams for cleaner, more maintainable code.
+ * Service for finding pets within an owner's collection. Part of the Strangler Fig
+ * refactoring to extract search logic from domain models. Uses functional programming
+ * with Streams for cleaner, more maintainable code.
  *
  * @author Tech Debt Refactoring Team
  */
@@ -42,10 +42,7 @@ public class PetFinderService {
 			return Optional.empty();
 		}
 
-		return pets.stream()
-			.filter(pet -> !pet.isNew())
-			.filter(pet -> Objects.equals(pet.getId(), id))
-			.findFirst();
+		return pets.stream().filter(pet -> !pet.isNew()).filter(pet -> Objects.equals(pet.getId(), id)).findFirst();
 	}
 
 	/**

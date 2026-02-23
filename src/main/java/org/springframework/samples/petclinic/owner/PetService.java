@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
- * Service for managing Pet business logic.
- * Part of the Strangler Fig refactoring to extract business logic from controllers.
+ * Service for managing Pet business logic. Part of the Strangler Fig refactoring to
+ * extract business logic from controllers.
  *
  * @author Tech Debt Refactoring Team
  */
@@ -47,10 +47,9 @@ public class PetService {
 	}
 
 	/**
-	 * Updates an existing pet's details or adds it if it doesn't exist.
-	 * This method implements the Single Responsibility Principle by separating
-	 * the update logic from the controller.
-	 *
+	 * Updates an existing pet's details or adds it if it doesn't exist. This method
+	 * implements the Single Responsibility Principle by separating the update logic from
+	 * the controller.
 	 * @param owner the owner of the pet
 	 * @param pet the pet with updated details
 	 * @return the saved owner
