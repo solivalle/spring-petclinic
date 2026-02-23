@@ -20,8 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -52,8 +50,11 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	public OwnerController(OwnerRepository owners) {
+	private final OwnerSearchService ownerSearchService;
+
+	public OwnerController(OwnerRepository owners, OwnerSearchService ownerSearchService) {
 		this.owners = owners;
+		this.ownerSearchService = ownerSearchService;
 	}
 
 	@InitBinder
@@ -94,28 +95,26 @@ class OwnerController {
 	@GetMapping("/owners")
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
-		// allow parameterless GET request for /owners to return all records
-		String lastName = owner.getLastName();
-		if (lastName == null) {
-			lastName = ""; // empty string signifies broadest possible search
-		}
 
-		// find owners by last name
-		Page<Owner> ownersResults = findPaginatedForOwnersLastName(page, lastName);
-		if (ownersResults.isEmpty()) {
-			// no owners found
-			result.rejectValue("lastName", "notFound", "not found");
-			return "owners/findOwners";
-		}
+		// Use the new search service (Strangler Fig Pattern)
+		OwnerSearchService.SearchResult searchResult = ownerSearchService.findOwnersByLastName(page,
+				owner.getLastName());
 
-		if (ownersResults.getTotalElements() == 1) {
-			// 1 owner found
-			owner = ownersResults.iterator().next();
-			return "redirect:/owners/" + owner.getId();
-		}
+		switch (searchResult.getSearchType()) {
+			case NO_RESULTS:
+				result.rejectValue("lastName", "notFound", "not found");
+				return "owners/findOwners";
 
-		// multiple owners found
-		return addPaginationModel(page, model, ownersResults);
+			case SINGLE_RESULT:
+				Owner foundOwner = searchResult.getSingleResult();
+				return "redirect:/owners/" + foundOwner.getId();
+
+			case MULTIPLE_RESULTS:
+				return addPaginationModel(page, model, searchResult.getOwners());
+
+			default:
+				throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
+		}
 	}
 
 	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
@@ -125,12 +124,6 @@ class OwnerController {
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listOwners", listOwners);
 		return "owners/ownersList";
-	}
-
-	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
-		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		return owners.findByLastNameStartingWith(lastname, pageable);
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
