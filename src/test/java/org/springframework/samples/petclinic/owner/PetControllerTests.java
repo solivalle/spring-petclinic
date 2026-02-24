@@ -32,7 +32,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -64,6 +66,12 @@ class PetControllerTests {
 	@MockitoBean
 	private PetTypeRepository types;
 
+	@MockitoBean
+	private PetValidationService petValidationService;
+
+	@MockitoBean
+	private PetService petService;
+
 	@BeforeEach
 	void setup() {
 		PetType cat = new PetType();
@@ -81,6 +89,16 @@ class PetControllerTests {
 		pet.setName("petty");
 		dog.setName("doggy");
 		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(owner));
+
+		// Configure petValidationService to perform real validations
+		PetValidationService realValidationService = new PetValidationService();
+		doAnswer(invocation -> {
+			Pet p = invocation.getArgument(0);
+			Owner o = invocation.getArgument(1);
+			org.springframework.validation.Errors errors = invocation.getArgument(2);
+			realValidationService.validatePet(p, o, errors);
+			return null;
+		}).when(petValidationService).validatePet(any(Pet.class), any(Owner.class), any());
 	}
 
 	@Test

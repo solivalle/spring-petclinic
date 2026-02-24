@@ -68,6 +68,9 @@ class OwnerControllerTests {
 	@MockitoBean
 	private OwnerRepository owners;
 
+	@MockitoBean
+	private OwnerSearchService ownerSearchService;
+
 	private Owner george() {
 		Owner george = new Owner();
 		george.setId(TEST_OWNER_ID);
@@ -142,14 +145,18 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindFormSuccess() throws Exception {
 		Page<Owner> tasks = new PageImpl<>(List.of(george(), new Owner()));
-		when(this.owners.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(tasks);
+		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
+				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), any())).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
 	}
 
 	@Test
 	void testProcessFindFormByLastName() throws Exception {
 		Page<Owner> tasks = new PageImpl<>(List.of(george()));
-		when(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class))).thenReturn(tasks);
+		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
+				OwnerSearchService.SearchType.SINGLE_RESULT);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Franklin"))).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
@@ -158,7 +165,9 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindFormNoOwnersFound() throws Exception {
 		Page<Owner> tasks = new PageImpl<>(List.of());
-		when(this.owners.findByLastNameStartingWith(eq("Unknown Surname"), any(Pageable.class))).thenReturn(tasks);
+		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
+				OwnerSearchService.SearchType.NO_RESULTS);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Unknown Surname"))).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname"))
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))

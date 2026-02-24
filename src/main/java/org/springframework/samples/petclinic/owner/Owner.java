@@ -102,6 +102,7 @@ public class Owner extends Person {
 
 	/**
 	 * Return the Pet with the given name, or null if none found for this Owner.
+	 * Refactored to use Streams for better readability and performance.
 	 * @param name to test
 	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
 	 */
@@ -110,38 +111,40 @@ public class Owner extends Person {
 	}
 
 	/**
-	 * Return the Pet with the given id, or null if none found for this Owner.
+	 * Return the Pet with the given id, or null if none found for this Owner. Refactored
+	 * to use Streams for better readability and performance.
 	 * @param id to test
 	 * @return the Pet with the given id, or null if no such Pet exists for this Owner
 	 */
 	public Pet getPet(Integer id) {
-		for (Pet pet : getPets()) {
-			if (!pet.isNew()) {
-				Integer compId = pet.getId();
-				if (Objects.equals(compId, id)) {
-					return pet;
-				}
-			}
+		if (id == null) {
+			return null;
 		}
-		return null;
+
+		return getPets().stream()
+			.filter(pet -> !pet.isNew())
+			.filter(pet -> Objects.equals(pet.getId(), id))
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
 	 * Return the Pet with the given name, or null if none found for this Owner.
+	 * Refactored to use Streams for better readability and performance.
 	 * @param name to test
 	 * @param ignoreNew whether to ignore new pets (pets that are not saved yet)
 	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
 	 */
 	public Pet getPet(String name, boolean ignoreNew) {
-		for (Pet pet : getPets()) {
-			String compName = pet.getName();
-			if (compName != null && compName.equalsIgnoreCase(name)) {
-				if (!ignoreNew || !pet.isNew()) {
-					return pet;
-				}
-			}
+		if (name == null) {
+			return null;
 		}
-		return null;
+
+		return getPets().stream()
+			.filter(pet -> name.equalsIgnoreCase(pet.getName()))
+			.filter(pet -> !ignoreNew || !pet.isNew())
+			.findFirst()
+			.orElse(null);
 	}
 
 	@Override
