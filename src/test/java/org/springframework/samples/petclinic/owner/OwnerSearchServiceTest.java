@@ -32,14 +32,11 @@ class OwnerSearchServiceTest {
 	void shouldReturnNoResultsWhenPageIsEmpty() {
 		Page<Owner> emptyPage = Page.empty();
 
-		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class)))
-			.thenReturn(emptyPage);
+		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(emptyPage);
 
-		OwnerSearchService.SearchResult result =
-			service.findOwnersByLastName(1, "Smith");
+		OwnerSearchService.SearchResult result = service.findOwnersByLastName(1, "Smith");
 
-		assertThat(result.getSearchType())
-			.isEqualTo(OwnerSearchService.SearchType.NO_RESULTS);
+		assertThat(result.getSearchType()).isEqualTo(OwnerSearchService.SearchType.NO_RESULTS);
 
 		assertThat(result.isEmpty()).isTrue();
 	}
@@ -49,14 +46,11 @@ class OwnerSearchServiceTest {
 		Owner owner = new Owner();
 		Page<Owner> page = new PageImpl<>(List.of(owner));
 
-		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class)))
-			.thenReturn(page);
+		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(page);
 
-		OwnerSearchService.SearchResult result =
-			service.findOwnersByLastName(1, "Smith");
+		OwnerSearchService.SearchResult result = service.findOwnersByLastName(1, "Smith");
 
-		assertThat(result.getSearchType())
-			.isEqualTo(OwnerSearchService.SearchType.SINGLE_RESULT);
+		assertThat(result.getSearchType()).isEqualTo(OwnerSearchService.SearchType.SINGLE_RESULT);
 
 		assertThat(result.isSingleResult()).isTrue();
 		assertThat(result.getSingleResult()).isEqualTo(owner);
@@ -69,14 +63,11 @@ class OwnerSearchServiceTest {
 
 		Page<Owner> page = new PageImpl<>(List.of(owner1, owner2));
 
-		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class)))
-			.thenReturn(page);
+		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(page);
 
-		OwnerSearchService.SearchResult result =
-			service.findOwnersByLastName(1, "Smith");
+		OwnerSearchService.SearchResult result = service.findOwnersByLastName(1, "Smith");
 
-		assertThat(result.getSearchType())
-			.isEqualTo(OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+		assertThat(result.getSearchType()).isEqualTo(OwnerSearchService.SearchType.MULTIPLE_RESULTS);
 
 		assertThat(result.isSingleResult()).isFalse();
 	}
@@ -88,14 +79,11 @@ class OwnerSearchServiceTest {
 
 		Page<Owner> page = new PageImpl<>(List.of(owner1, owner2));
 
-		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class)))
-			.thenReturn(page);
+		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(page);
 
-		OwnerSearchService.SearchResult result =
-			service.findOwnersByLastName(1, "Smith");
+		OwnerSearchService.SearchResult result = service.findOwnersByLastName(1, "Smith");
 
-		assertThatThrownBy(result::getSingleResult)
-			.isInstanceOf(IllegalStateException.class)
+		assertThatThrownBy(result::getSingleResult).isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("Cannot get single result");
 	}
 
@@ -103,30 +91,23 @@ class OwnerSearchServiceTest {
 	void shouldNormalizeNullSearchTermToEmptyString() {
 		Page<Owner> emptyPage = Page.empty();
 
-		when(ownerRepository.findByLastNameStartingWith(eq(""), any(Pageable.class)))
-			.thenReturn(emptyPage);
+		when(ownerRepository.findByLastNameStartingWith(eq(""), any(Pageable.class))).thenReturn(emptyPage);
 
 		service.findOwnersByLastName(1, null);
 
-		verify(ownerRepository)
-			.findByLastNameStartingWith(eq(""), any(Pageable.class));
+		verify(ownerRepository).findByLastNameStartingWith(eq(""), any(Pageable.class));
 	}
 
 	@Test
 	void shouldUseCorrectPaginationIndex() {
 		Page<Owner> emptyPage = Page.empty();
 
-		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class)))
-			.thenReturn(emptyPage);
+		when(ownerRepository.findByLastNameStartingWith(anyString(), any(Pageable.class))).thenReturn(emptyPage);
 
 		service.findOwnersByLastName(2, "Smith");
 
-		verify(ownerRepository).findByLastNameStartingWith(
-			eq("Smith"),
-			argThat(pageable ->
-				pageable.getPageNumber() == 1 &&
-					pageable.getPageSize() == 5
-			)
-		);
+		verify(ownerRepository).findByLastNameStartingWith(eq("Smith"),
+				argThat(pageable -> pageable.getPageNumber() == 1 && pageable.getPageSize() == 5));
 	}
+
 }
