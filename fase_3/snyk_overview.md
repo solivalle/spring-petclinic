@@ -2,7 +2,7 @@
 
 ## Overview
 
-As part of the security assessment process for this project, a dependency vulnerability scan was performed using the tool :contentReference[oaicite:0]{index=0}. The purpose of this scan was to identify known security vulnerabilities in the project's dependencies and address them through appropriate remediation strategies.
+As part of the security assessment process for this project, a dependency vulnerability scan was performed using the tool snyk. The purpose of this scan was to identify known security vulnerabilities in the project's dependencies and address them through appropriate remediation strategies.
 
 The scan revealed multiple vulnerabilities, including two that were prioritized for remediation. These vulnerabilities were addressed by updating the affected dependencies to secure versions.
 
