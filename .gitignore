@@ -42,6 +42,10 @@ out/
 ### VS Code ###
 .vscode/
 
+### Node / Husky ###
+node_modules/
+.husky/_/
+
 ### CSS ###
 _site/
 *.css
