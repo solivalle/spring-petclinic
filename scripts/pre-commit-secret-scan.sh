@@ -16,7 +16,7 @@ fi
 
 # Common high-signal patterns for leaked credentials.
 known_secret_regex='AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|gh[pousr]_[A-Za-z0-9]{36,255}|xox[baprs]-[A-Za-z0-9-]{10,}|sk_(live|test)_[0-9A-Za-z]{16,}|-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'
-generic_secret_regex='(api[-_ ]?key|secret|token|password|passwd|private[-_ ]?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9_./+=-]{12,}'
+generic_secret_regex='(api[-_ ]?key|secret|token|password|passwd|private[-_ ]?key|client[-_ ]?secret)[[:space:]]*[:=][[:space:]]*["'"'"']?[^"'"'"'[:space:]]{1,}'
 placeholder_regex='(example|sample|dummy|test|fake|placeholder|changeme|your[_ -]?key|\$\{[A-Za-z0-9_.-]+\}|<[^>]+>)'
 
 has_findings=0
