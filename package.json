@@ -1,0 +1,11 @@
+{
+  "name": "spring-petclinic-hooks",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "secret:scan": "bash scripts/pre-commit-secret-scan.sh"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
