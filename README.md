@@ -11,6 +11,8 @@
 
 **File:** [`fase_3/snyk_overview.md`](fase_3/snyk_overview.md)
 
+**File:** [`fase_4/fase4.md`](fase_4/fase4.md)
+
 # 🏛️ Legacy Readme
 
 **File:** [legacyreadme.md](docs/legacyreadme.md)
