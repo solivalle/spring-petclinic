@@ -123,7 +123,7 @@ class OwnerController {
 	}
 
 	@GetMapping("/only/owners")
-	public String processFindFormForOnlyOwners(@RequestParam(defaultValue = "1") int page, Owner owner,
+	public String processFindFormForOnlyOwners(@RequestParam(defaultValue = "1") int page, OwnerRequest owner,
 			BindingResult result, Model model) {
 
 		// Use the new search service (Strangler Fig Pattern)

@@ -45,6 +45,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -314,7 +315,8 @@ class OwnerControllerTests {
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Unknown"))
 			.andExpect(status().isOk())
-			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
+			.andExpect(model().attributeHasFieldErrors("ownerRequest", "lastName"))
+			.andDo(print())
 			.andExpect(view().name("owners/findOwners"));
 	}
 
