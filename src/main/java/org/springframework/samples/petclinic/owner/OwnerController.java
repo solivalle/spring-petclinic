@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,29 +97,74 @@ class OwnerController {
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
 
-		// Use the new search service (Strangler Fig Pattern)
-		OwnerSearchService.SearchResult searchResult = ownerSearchService.findOwnersByLastName(page,
-				owner.getLastName());
+		long start = Instant.now().toEpochMilli();
 
-		switch (searchResult.getSearchType()) {
-			case NO_RESULTS:
-				result.rejectValue("lastName", "notFound", "not found");
-				return "owners/findOwners";
+		try {
 
-			case SINGLE_RESULT:
-				Owner foundOwner = searchResult.getSingleResult();
-				return "redirect:/owners/" + foundOwner.getId();
+			// Use the new search service (Strangler Fig Pattern)
+			OwnerSearchService.SearchResult<Owner> searchResult = ownerSearchService.findOwnersByLastName(page,
+					owner.getLastName());
 
-			case MULTIPLE_RESULTS:
-				return addPaginationModel(page, model, searchResult.getOwners());
+			switch (searchResult.getSearchType()) {
+				case NO_RESULTS:
+					result.rejectValue("lastName", "notFound", "not found");
+					return "owners/findOwners";
 
-			default:
-				throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
+				case SINGLE_RESULT:
+					Owner foundOwner = searchResult.getSingleResult();
+					return "redirect:/owners/" + foundOwner.getId();
+
+				case MULTIPLE_RESULTS:
+					return addPaginationModel(page, model, searchResult.getOwners());
+
+				default:
+					throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
+			}
+		}
+		finally {
+			long end = Instant.now().toEpochMilli();
+			long total = end - start;
+			System.out.println(String.format("Millis taken for /owners API: %d", total));
 		}
 	}
 
-	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
-		List<Owner> listOwners = paginated.getContent();
+	@GetMapping("/only/owners")
+	public String processFindFormForOnlyOwners(@RequestParam(defaultValue = "1") int page, Owner owner,
+			BindingResult result, Model model) {
+
+		long start = Instant.now().toEpochMilli();
+
+		try {
+
+			// Use the new search service (Strangler Fig Pattern)
+			OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService
+				.findSingleOwnersByLastName(page, owner.getLastName());
+
+			switch (searchResult.getSearchType()) {
+				case NO_RESULTS:
+					result.rejectValue("lastName", "notFound", "not found");
+					return "owners/findOwners";
+
+				case SINGLE_RESULT:
+					SingleOwner foundOwner = searchResult.getSingleResult();
+					return "redirect:/owners/" + foundOwner.getId();
+
+				case MULTIPLE_RESULTS:
+					return addPaginationModel(page, model, searchResult.getOwners());
+
+				default:
+					throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
+			}
+		}
+		finally {
+			long end = Instant.now().toEpochMilli();
+			long total = end - start;
+			System.out.println(String.format("Millis taken for /only/owners API: %d", total));
+		}
+	}
+
+	private <T> String addPaginationModel(int page, Model model, Page<T> paginated) {
+		List<T> listOwners = paginated.getContent();
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
