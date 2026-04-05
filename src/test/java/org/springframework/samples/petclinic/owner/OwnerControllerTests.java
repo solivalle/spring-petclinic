@@ -260,11 +260,10 @@ class OwnerControllerTests {
 	@Test
 	void testProcessFindForm_NoResults() throws Exception {
 		Page<Owner> emptyPage = new PageImpl<>(List.of());
-		OwnerSearchService.SearchResult<Owner> searchResult =
-			new OwnerSearchService.SearchResult<>(emptyPage, OwnerSearchService.SearchType.NO_RESULTS);
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(emptyPage,
+				OwnerSearchService.SearchType.NO_RESULTS);
 
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Unknown")))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Unknown"))).thenReturn(searchResult);
 
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown"))
 			.andExpect(status().isOk())
@@ -278,11 +277,10 @@ class OwnerControllerTests {
 		Owner george = george();
 		Page<Owner> page = new PageImpl<>(List.of(george));
 
-		OwnerSearchService.SearchResult<Owner> searchResult =
-			new OwnerSearchService.SearchResult<>(page, OwnerSearchService.SearchType.SINGLE_RESULT);
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.SINGLE_RESULT);
 
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Franklin")))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Franklin"))).thenReturn(searchResult);
 
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
@@ -293,11 +291,10 @@ class OwnerControllerTests {
 	void testProcessFindForm_MultipleResults() throws Exception {
 		Page<Owner> page = new PageImpl<>(List.of(george(), new Owner()));
 
-		OwnerSearchService.SearchResult<Owner> searchResult =
-			new OwnerSearchService.SearchResult<>(page, OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
 
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), anyString()))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(eq(1), anyString())).thenReturn(searchResult);
 
 		mockMvc.perform(get("/owners?page=1").param("lastName", "F"))
 			.andExpect(status().isOk())
@@ -312,11 +309,10 @@ class OwnerControllerTests {
 	void testProcessFindFormOnlyOwners_NoResults() throws Exception {
 		Page<SingleOwner> emptyPage = new PageImpl<>(List.of());
 
-		OwnerSearchService.SearchResult<SingleOwner> searchResult =
-			new OwnerSearchService.SearchResult<>(emptyPage, OwnerSearchService.SearchType.NO_RESULTS);
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(emptyPage,
+				OwnerSearchService.SearchType.NO_RESULTS);
 
-		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), eq("Unknown")))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), eq("Unknown"))).thenReturn(searchResult);
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Unknown"))
 			.andExpect(status().isOk())
@@ -331,11 +327,10 @@ class OwnerControllerTests {
 
 		Page<SingleOwner> page = new PageImpl<>(List.of(singleOwner));
 
-		OwnerSearchService.SearchResult<SingleOwner> searchResult =
-			new OwnerSearchService.SearchResult<>(page, OwnerSearchService.SearchType.SINGLE_RESULT);
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.SINGLE_RESULT);
 
-		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), eq("Franklin")))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), eq("Franklin"))).thenReturn(searchResult);
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
@@ -349,11 +344,10 @@ class OwnerControllerTests {
 
 		Page<SingleOwner> page = new PageImpl<>(List.of(owner1, owner2));
 
-		OwnerSearchService.SearchResult<SingleOwner> searchResult =
-			new OwnerSearchService.SearchResult<>(page, OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
 
-		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), anyString()))
-			.thenReturn(searchResult);
+		when(this.ownerSearchService.findSingleOwnersByLastName(eq(1), anyString())).thenReturn(searchResult);
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "F"))
 			.andExpect(status().isOk())

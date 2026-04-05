@@ -124,8 +124,8 @@ class OwnerController {
 			BindingResult result, Model model) {
 
 		// Use the new search service (Strangler Fig Pattern)
-		OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService
-			.findSingleOwnersByLastName(page, owner.getLastName());
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService.findSingleOwnersByLastName(page,
+				owner.getLastName());
 
 		switch (searchResult.getSearchType()) {
 			case NO_RESULTS:
