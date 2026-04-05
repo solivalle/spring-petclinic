@@ -310,7 +310,7 @@ class OwnerControllerTests {
 		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(emptyPage,
 				OwnerSearchService.SearchType.NO_RESULTS);
 
-		when(this.ownerSearchService.findSingleOwnersByLastName(1, "Unknown")).thenReturn(searchResult);
+		when(this.ownerSearchService.findSingleOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Unknown"))
 			.andExpect(status().isOk())
@@ -328,7 +328,7 @@ class OwnerControllerTests {
 		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(page,
 				OwnerSearchService.SearchType.SINGLE_RESULT);
 
-		when(this.ownerSearchService.findSingleOwnersByLastName(1, "Franklin")).thenReturn(searchResult);
+		when(this.ownerSearchService.findSingleOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
 
 		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
