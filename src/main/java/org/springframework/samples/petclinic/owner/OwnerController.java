@@ -97,69 +97,50 @@ class OwnerController {
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
 
-		long start = Instant.now().toEpochMilli();
+		// Use the new search service (Strangler Fig Pattern)
+		OwnerSearchService.SearchResult<Owner> searchResult = ownerSearchService.findOwnersByLastName(page,
+				owner.getLastName());
 
-		try {
+		switch (searchResult.getSearchType()) {
+			case NO_RESULTS:
+				result.rejectValue("lastName", "notFound", "not found");
+				return "owners/findOwners";
 
-			// Use the new search service (Strangler Fig Pattern)
-			OwnerSearchService.SearchResult<Owner> searchResult = ownerSearchService.findOwnersByLastName(page,
-					owner.getLastName());
+			case SINGLE_RESULT:
+				Owner foundOwner = searchResult.getSingleResult();
+				return "redirect:/owners/" + foundOwner.getId();
 
-			switch (searchResult.getSearchType()) {
-				case NO_RESULTS:
-					result.rejectValue("lastName", "notFound", "not found");
-					return "owners/findOwners";
+			case MULTIPLE_RESULTS:
+				return addPaginationModel(page, model, searchResult.getOwners());
 
-				case SINGLE_RESULT:
-					Owner foundOwner = searchResult.getSingleResult();
-					return "redirect:/owners/" + foundOwner.getId();
-
-				case MULTIPLE_RESULTS:
-					return addPaginationModel(page, model, searchResult.getOwners());
-
-				default:
-					throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
-			}
+			default:
+				throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
 		}
-		finally {
-			long end = Instant.now().toEpochMilli();
-			long total = end - start;
-			System.out.println(String.format("Millis taken for /owners API: %d", total));
-		}
+
 	}
 
 	@GetMapping("/only/owners")
 	public String processFindFormForOnlyOwners(@RequestParam(defaultValue = "1") int page, Owner owner,
 			BindingResult result, Model model) {
 
-		long start = Instant.now().toEpochMilli();
+		// Use the new search service (Strangler Fig Pattern)
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService
+			.findSingleOwnersByLastName(page, owner.getLastName());
 
-		try {
+		switch (searchResult.getSearchType()) {
+			case NO_RESULTS:
+				result.rejectValue("lastName", "notFound", "not found");
+				return "owners/findOwners";
 
-			// Use the new search service (Strangler Fig Pattern)
-			OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService
-				.findSingleOwnersByLastName(page, owner.getLastName());
+			case SINGLE_RESULT:
+				SingleOwner foundOwner = searchResult.getSingleResult();
+				return "redirect:/owners/" + foundOwner.getId();
 
-			switch (searchResult.getSearchType()) {
-				case NO_RESULTS:
-					result.rejectValue("lastName", "notFound", "not found");
-					return "owners/findOwners";
+			case MULTIPLE_RESULTS:
+				return addPaginationModel(page, model, searchResult.getOwners());
 
-				case SINGLE_RESULT:
-					SingleOwner foundOwner = searchResult.getSingleResult();
-					return "redirect:/owners/" + foundOwner.getId();
-
-				case MULTIPLE_RESULTS:
-					return addPaginationModel(page, model, searchResult.getOwners());
-
-				default:
-					throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
-			}
-		}
-		finally {
-			long end = Instant.now().toEpochMilli();
-			long total = end - start;
-			System.out.println(String.format("Millis taken for /only/owners API: %d", total));
+			default:
+				throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
 		}
 	}
 
