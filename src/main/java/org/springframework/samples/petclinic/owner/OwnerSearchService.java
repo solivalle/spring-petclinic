@@ -97,7 +97,7 @@ public class OwnerSearchService {
 		Page<Owner> owners = findPaginatedByLastName(page, searchTerm);
 
 		SearchType type = determineSearchType(owners.getTotalElements());
-		return new SearchResult<Owner>(owners, type);
+		return new SearchResult<>(owners, type);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class OwnerSearchService {
 		Page<SingleOwner> owners = findSingleOwnerPaginatedByLastName(page, searchTerm);
 
 		SearchType type = determineSearchType(owners.getTotalElements());
-		return new SearchResult<SingleOwner>(owners, type);
+		return new SearchResult<>(owners, type);
 	}
 
 	/**
