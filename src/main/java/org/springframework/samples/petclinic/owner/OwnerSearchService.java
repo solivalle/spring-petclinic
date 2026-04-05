@@ -106,7 +106,7 @@ public class OwnerSearchService {
 	 * @param lastName the last name to search for (empty string for all owners)
 	 * @return the search result with owners and metadata
 	 */
-	public SearchResult<SingleOwner>  findSingleOwnersByLastName(int page, String lastName) {
+	public SearchResult<SingleOwner> findSingleOwnersByLastName(int page, String lastName) {
 		String searchTerm = normalizeSearchTerm(lastName);
 		Page<SingleOwner> owners = findSingleOwnerPaginatedByLastName(page, searchTerm);
 
