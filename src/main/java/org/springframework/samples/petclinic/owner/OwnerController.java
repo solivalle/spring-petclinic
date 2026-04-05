@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,6 +47,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
+	private static final String REDIRECT_OWNERS = "redirect:/owners/";
+	private static final String OWNERS_FIND_OWNERS = "owners/findOwners";
 
 	private final OwnerRepository owners;
 
@@ -85,12 +86,12 @@ class OwnerController {
 
 		this.owners.save(owner);
 		redirectAttributes.addFlashAttribute("message", "New Owner Created");
-		return "redirect:/owners/" + owner.getId();
+		return REDIRECT_OWNERS + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm() {
-		return "owners/findOwners";
+		return OWNERS_FIND_OWNERS;
 	}
 
 	@GetMapping("/owners")
@@ -104,11 +105,11 @@ class OwnerController {
 		switch (searchResult.getSearchType()) {
 			case NO_RESULTS:
 				result.rejectValue("lastName", "notFound", "not found");
-				return "owners/findOwners";
+				return OWNERS_FIND_OWNERS;
 
 			case SINGLE_RESULT:
 				Owner foundOwner = searchResult.getSingleResult();
-				return "redirect:/owners/" + foundOwner.getId();
+				return REDIRECT_OWNERS + foundOwner.getId();
 
 			case MULTIPLE_RESULTS:
 				return addPaginationModel(page, model, searchResult.getOwners());
@@ -130,11 +131,11 @@ class OwnerController {
 		switch (searchResult.getSearchType()) {
 			case NO_RESULTS:
 				result.rejectValue("lastName", "notFound", "not found");
-				return "owners/findOwners";
+				return OWNERS_FIND_OWNERS;
 
 			case SINGLE_RESULT:
 				SingleOwner foundOwner = searchResult.getSingleResult();
-				return "redirect:/owners/" + foundOwner.getId();
+				return REDIRECT_OWNERS + foundOwner.getId();
 
 			case MULTIPLE_RESULTS:
 				return addPaginationModel(page, model, searchResult.getOwners());
