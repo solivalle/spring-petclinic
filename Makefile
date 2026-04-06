@@ -49,6 +49,11 @@ reset: clean build docker-build up
 logs:
 	docker-compose logs -f
 
+# Run Delivery 5 reproducible benchmark (requires k6)
+.PHONY: benchmark-finops
+benchmark-finops:
+	./scripts/run_finops_benchmark.sh
+
 # Stop and remove everything including volumes
 .PHONY: destroy
 destroy:
