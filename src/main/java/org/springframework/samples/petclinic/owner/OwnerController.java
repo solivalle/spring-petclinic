@@ -48,6 +48,10 @@ class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
+	private static final String REDIRECT_OWNERS = "redirect:/owners/";
+
+	private static final String OWNERS_FIND_OWNERS = "owners/findOwners";
+
 	private final OwnerRepository owners;
 
 	private final OwnerSearchService ownerSearchService;
@@ -84,12 +88,12 @@ class OwnerController {
 
 		this.owners.save(owner);
 		redirectAttributes.addFlashAttribute("message", "New Owner Created");
-		return "redirect:/owners/" + owner.getId();
+		return REDIRECT_OWNERS + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
 	public String initFindForm() {
-		return "owners/findOwners";
+		return OWNERS_FIND_OWNERS;
 	}
 
 	@GetMapping("/owners")
@@ -97,17 +101,43 @@ class OwnerController {
 			Model model) {
 
 		// Use the new search service (Strangler Fig Pattern)
-		OwnerSearchService.SearchResult searchResult = ownerSearchService.findOwnersByLastName(page,
+		OwnerSearchService.SearchResult<Owner> searchResult = ownerSearchService.findOwnersByLastName(page,
 				owner.getLastName());
 
 		switch (searchResult.getSearchType()) {
 			case NO_RESULTS:
 				result.rejectValue("lastName", "notFound", "not found");
-				return "owners/findOwners";
+				return OWNERS_FIND_OWNERS;
 
 			case SINGLE_RESULT:
 				Owner foundOwner = searchResult.getSingleResult();
-				return "redirect:/owners/" + foundOwner.getId();
+				return REDIRECT_OWNERS + foundOwner.getId();
+
+			case MULTIPLE_RESULTS:
+				return addPaginationModel(page, model, searchResult.getOwners());
+
+			default:
+				throw new IllegalStateException("Unexpected search type: " + searchResult.getSearchType());
+		}
+
+	}
+
+	@GetMapping("/only/owners")
+	public String processFindFormForOnlyOwners(@RequestParam(defaultValue = "1") int page, OwnerRequest owner,
+			BindingResult result, Model model) {
+
+		// Use the new search service (Strangler Fig Pattern)
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = ownerSearchService.findSingleOwnersByLastName(page,
+				owner.getLastName());
+
+		switch (searchResult.getSearchType()) {
+			case NO_RESULTS:
+				result.rejectValue("lastName", "notFound", "not found");
+				return OWNERS_FIND_OWNERS;
+
+			case SINGLE_RESULT:
+				SingleOwner foundOwner = searchResult.getSingleResult();
+				return REDIRECT_OWNERS + foundOwner.getId();
 
 			case MULTIPLE_RESULTS:
 				return addPaginationModel(page, model, searchResult.getOwners());
@@ -117,8 +147,8 @@ class OwnerController {
 		}
 	}
 
-	private String addPaginationModel(int page, Model model, Page<Owner> paginated) {
-		List<Owner> listOwners = paginated.getContent();
+	private <T> String addPaginationModel(int page, Model model, Page<T> paginated) {
+		List<T> listOwners = paginated.getContent();
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());

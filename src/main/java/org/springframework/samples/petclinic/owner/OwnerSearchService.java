@@ -41,18 +41,18 @@ public class OwnerSearchService {
 	/**
 	 * Search result container with additional metadata.
 	 */
-	public static class SearchResult {
+	public static class SearchResult<T> {
 
-		private final Page<Owner> owners;
+		private final Page<T> owners;
 
 		private final SearchType searchType;
 
-		public SearchResult(Page<Owner> owners, SearchType searchType) {
+		public SearchResult(Page<T> owners, SearchType searchType) {
 			this.owners = owners;
 			this.searchType = searchType;
 		}
 
-		public Page<Owner> getOwners() {
+		public Page<T> getOwners() {
 			return owners;
 		}
 
@@ -68,7 +68,7 @@ public class OwnerSearchService {
 			return owners.getTotalElements() == 1;
 		}
 
-		public Owner getSingleResult() {
+		public T getSingleResult() {
 			if (!isSingleResult()) {
 				throw new IllegalStateException("Cannot get single result when multiple or no results exist");
 			}
@@ -92,12 +92,26 @@ public class OwnerSearchService {
 	 * @param lastName the last name to search for (empty string for all owners)
 	 * @return the search result with owners and metadata
 	 */
-	public SearchResult findOwnersByLastName(int page, String lastName) {
+	public SearchResult<Owner> findOwnersByLastName(int page, String lastName) {
 		String searchTerm = normalizeSearchTerm(lastName);
 		Page<Owner> owners = findPaginatedByLastName(page, searchTerm);
 
-		SearchType type = determineSearchType(owners);
-		return new SearchResult(owners, type);
+		SearchType type = determineSearchType(owners.getTotalElements());
+		return new SearchResult<>(owners, type);
+	}
+
+	/**
+	 * Searches for owners by last name with pagination.
+	 * @param page the page number (1-indexed)
+	 * @param lastName the last name to search for (empty string for all owners)
+	 * @return the search result with owners and metadata
+	 */
+	public SearchResult<SingleOwner> findSingleOwnersByLastName(int page, String lastName) {
+		String searchTerm = normalizeSearchTerm(lastName);
+		Page<SingleOwner> owners = findSingleOwnerPaginatedByLastName(page, searchTerm);
+
+		SearchType type = determineSearchType(owners.getTotalElements());
+		return new SearchResult<>(owners, type);
 	}
 
 	/**
@@ -111,14 +125,14 @@ public class OwnerSearchService {
 
 	/**
 	 * Determines the type of search result based on the number of owners found.
-	 * @param owners the page of owners
+	 * @param size the page of owners
 	 * @return the search type
 	 */
-	private SearchType determineSearchType(Page<Owner> owners) {
-		if (owners.isEmpty()) {
+	private SearchType determineSearchType(long size) {
+		if (size == 0) {
 			return SearchType.NO_RESULTS;
 		}
-		else if (owners.getTotalElements() == 1) {
+		else if (size == 1) {
 			return SearchType.SINGLE_RESULT;
 		}
 		else {
@@ -135,6 +149,17 @@ public class OwnerSearchService {
 	private Page<Owner> findPaginatedByLastName(int page, String lastName) {
 		Pageable pageable = PageRequest.of(page - 1, DEFAULT_PAGE_SIZE);
 		return ownerRepository.findByLastNameStartingWith(lastName, pageable);
+	}
+
+	/**
+	 * Finds owners by last name with pagination.
+	 * @param page the page number (1-indexed)
+	 * @param lastName the last name prefix to search for
+	 * @return page of owners
+	 */
+	private Page<SingleOwner> findSingleOwnerPaginatedByLastName(int page, String lastName) {
+		Pageable pageable = PageRequest.of(page - 1, DEFAULT_PAGE_SIZE);
+		return ownerRepository.findSingleOwnerByLastNameStartingWith(lastName, pageable);
 	}
 
 }

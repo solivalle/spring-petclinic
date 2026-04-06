@@ -40,13 +40,12 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -94,7 +93,7 @@ class OwnerControllerTests {
 	void setup() {
 
 		Owner george = george();
-		given(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class)))
+		given(this.owners.findByLastNameStartingWith(anyString(), any(Pageable.class)))
 			.willReturn(new PageImpl<>(List.of(george)));
 
 		given(this.owners.findById(TEST_OWNER_ID)).willReturn(Optional.of(george));
@@ -147,7 +146,7 @@ class OwnerControllerTests {
 		Page<Owner> tasks = new PageImpl<>(List.of(george(), new Owner()));
 		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
 				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), any())).thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(anyInt(), any())).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1")).andExpect(status().isOk()).andExpect(view().name("owners/ownersList"));
 	}
 
@@ -156,7 +155,7 @@ class OwnerControllerTests {
 		Page<Owner> tasks = new PageImpl<>(List.of(george()));
 		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
 				OwnerSearchService.SearchType.SINGLE_RESULT);
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Franklin"))).thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(1, "Franklin")).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
@@ -167,7 +166,7 @@ class OwnerControllerTests {
 		Page<Owner> tasks = new PageImpl<>(List.of());
 		OwnerSearchService.SearchResult searchResult = new OwnerSearchService.SearchResult(tasks,
 				OwnerSearchService.SearchType.NO_RESULTS);
-		when(this.ownerSearchService.findOwnersByLastName(eq(1), eq("Unknown Surname"))).thenReturn(searchResult);
+		when(this.ownerSearchService.findOwnersByLastName(1, "Unknown Surname")).thenReturn(searchResult);
 		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown Surname"))
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
@@ -255,6 +254,108 @@ class OwnerControllerTests {
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/owners/" + pathOwnerId + "/edit"))
 			.andExpect(flash().attributeExists("error"));
+	}
+
+	@Test
+	void testProcessFindForm_NoResults() throws Exception {
+		Page<Owner> emptyPage = new PageImpl<>(List.of());
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(emptyPage,
+				OwnerSearchService.SearchType.NO_RESULTS);
+
+		when(this.ownerSearchService.findOwnersByLastName(1, "Unknown")).thenReturn(searchResult);
+
+		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown"))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
+			.andExpect(model().attributeHasFieldErrorCode("owner", "lastName", "notFound"))
+			.andExpect(view().name("owners/findOwners"));
+	}
+
+	@Test
+	void testProcessFindForm_SingleResult() throws Exception {
+		Owner george = george();
+		Page<Owner> page = new PageImpl<>(List.of(george));
+
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.SINGLE_RESULT);
+
+		when(this.ownerSearchService.findOwnersByLastName(1, "Franklin")).thenReturn(searchResult);
+
+		mockMvc.perform(get("/owners?page=1").param("lastName", "Franklin"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/" + george.getId()));
+	}
+
+	@Test
+	void testProcessFindForm_MultipleResults() throws Exception {
+		Page<Owner> page = new PageImpl<>(List.of(george(), new Owner()));
+
+		OwnerSearchService.SearchResult<Owner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+
+		when(this.ownerSearchService.findOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
+
+		mockMvc.perform(get("/owners?page=1").param("lastName", "F"))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeExists("listOwners"))
+			.andExpect(model().attributeExists("currentPage"))
+			.andExpect(model().attributeExists("totalPages"))
+			.andExpect(model().attributeExists("totalItems"))
+			.andExpect(view().name("owners/ownersList"));
+	}
+
+	@Test
+	void testProcessFindFormOnlyOwners_NoResults() throws Exception {
+		Page<SingleOwner> emptyPage = new PageImpl<>(List.of());
+
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(emptyPage,
+				OwnerSearchService.SearchType.NO_RESULTS);
+
+		when(this.ownerSearchService.findSingleOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
+
+		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Unknown"))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasFieldErrors("ownerRequest", "lastName"))
+			.andDo(print())
+			.andExpect(view().name("owners/findOwners"));
+	}
+
+	@Test
+	void testProcessFindFormOnlyOwners_SingleResult() throws Exception {
+		SingleOwner singleOwner = org.mockito.Mockito.mock(SingleOwner.class);
+		when(singleOwner.getId()).thenReturn(1);
+
+		Page<SingleOwner> page = new PageImpl<>(List.of(singleOwner));
+
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.SINGLE_RESULT);
+
+		when(this.ownerSearchService.findSingleOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
+
+		mockMvc.perform(get("/only/owners?page=1").param("lastName", "Franklin"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/1"));
+	}
+
+	@Test
+	void testProcessFindFormOnlyOwners_MultipleResults() throws Exception {
+		SingleOwner owner1 = org.mockito.Mockito.mock(SingleOwner.class);
+		SingleOwner owner2 = org.mockito.Mockito.mock(SingleOwner.class);
+
+		Page<SingleOwner> page = new PageImpl<>(List.of(owner1, owner2));
+
+		OwnerSearchService.SearchResult<SingleOwner> searchResult = new OwnerSearchService.SearchResult<>(page,
+				OwnerSearchService.SearchType.MULTIPLE_RESULTS);
+
+		when(this.ownerSearchService.findSingleOwnersByLastName(anyInt(), anyString())).thenReturn(searchResult);
+
+		mockMvc.perform(get("/only/owners?page=1").param("lastName", "F"))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeExists("listOwners"))
+			.andExpect(model().attributeExists("currentPage"))
+			.andExpect(model().attributeExists("totalPages"))
+			.andExpect(model().attributeExists("totalItems"))
+			.andExpect(view().name("owners/ownersList"));
 	}
 
 }
